@@ -1,9 +1,10 @@
 plugins {
-    kotlin("multiplatform") version "1.4.10"
-    kotlin("plugin.serialization") version "1.4.10"
+    kotlin("multiplatform") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
+    id("maven-publish")
 }
-group = "me.timo"
-version = "1.0-SNAPSHOT"
+group = "de.drick.serialization"
+version = "0.1"
 
 repositories {
     mavenCentral()
@@ -61,5 +62,13 @@ kotlin {
         }
         val nativeMain by getting
         val nativeTest by getting
+    }
+}
+
+publishing {
+    repositories {
+        maven{
+            setUrl("$rootDir/maven_repo")
+        }
     }
 }

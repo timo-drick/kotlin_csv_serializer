@@ -8,7 +8,7 @@ import platform.posix.fclose
 import platform.posix.fgets
 import platform.posix.fopen
 
-actual fun useFile(filePath: String, lineSequence: (Sequence<String>) -> Unit) {
+actual fun useFile(filePath: String, block: (Sequence<String>) -> Unit) {
     val file = fopen(filePath, "r") ?: throw Exception("cannot open input file: $filePath")
     try {
         val lineSequence = sequence<String> {
@@ -22,7 +22,7 @@ actual fun useFile(filePath: String, lineSequence: (Sequence<String>) -> Unit) {
                 }
             }
         }
-        lineSequence(lineSequence)
+        block(lineSequence)
     } finally {
         fclose(file)
     }

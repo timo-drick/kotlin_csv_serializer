@@ -38,8 +38,8 @@ class CsvElementDecoder(private val columnIndexMap: Map<String, Int>,
     }
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
         if (elementIndex == descriptor.elementsCount) return CompositeDecoder.DECODE_DONE
-        val fieldName = descriptor.getElementName(elementIndex).toLowerCase()
-        columnIndex = columnIndexMap[fieldName] ?: throw error("No header found for field: $fieldName")
+        val fieldName = descriptor.getElementName(elementIndex).lowercase()
+        columnIndex = columnIndexMap[fieldName] ?: error("No header found for field: $fieldName")
         return elementIndex++
     }
 
@@ -109,7 +109,7 @@ class CsvEncoder(override val serializersModule: SerializersModule) : AbstractEn
     }
 }
 
-expect fun useFile(filePath: String, lineSequence: (Sequence<String>) -> Unit)
+expect fun useFile(filePath: String, block: (Sequence<String>) -> Unit)
 
 sealed class CsvLine<out T: Any> {
     data class Item<T: Any>(val value: T): CsvLine<T>()
@@ -148,14 +148,14 @@ class Csv(private val module: SerializersModule = EmptySerializersModule) {
             = decodeIterator(list.iterator(), deserializer).asSequence()
 
     fun <T: Any> decodeIterator(iter: Iterator<String>, deserializer: DeserializationStrategy<T>): Iterator<CsvLine<T>> = iterator {
-        val iterator = iter.withIndex()
-        val header = iterator.next()
+        val iteratorIndexed = iter.withIndex()
+        val header = iteratorIndexed.next()
         val headers = parseCsvLine(header.value)
         val nameToIndexMap: Map<String, Int> = headers
-            .mapIndexed { index, key -> Pair(key.toLowerCase(), index) }
+            .mapIndexed { index, key -> Pair(key.lowercase(), index) }
             .associate { it }
         val decoder = CsvElementDecoder(nameToIndexMap, module)
-        iterator.forEach { (index, value) ->
+        iteratorIndexed.forEach { (index, value) ->
             try {
                 yield(CsvLine.Item(decoder.decodeLine(value, deserializer)))
             } catch (err: Throwable) {
